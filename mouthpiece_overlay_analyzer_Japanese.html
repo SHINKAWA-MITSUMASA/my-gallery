@@ -36,7 +36,7 @@
 </div>
 
 <script>
-    // ここに全てのファイル名を記載してください
+    // 【ここに画像ファイル名を全て記述してください】
     const imageFiles = [
         "01_BACH_3_S.png", "02_BACH_4C_S.png", "03_BACH_5GS_S.png", "04_BACH_6_S.png",
         "05_BACH_6-1p2AL_S_1.png", "06_BACH_6-1p2AL_S_2.png", "07_BACH_6-1p2AM_S_1.png",
@@ -77,7 +77,7 @@
         zoomCanvas.innerHTML = '';
         selectedIndices.forEach((idx, i) => {
             const img = document.createElement('img');
-            img.src = imageFiles[idx];
+            img.src = imageFiles[idx]; // リポジトリ内のパスを直接指定
             img.className = 'overlay-img';
             img.style.opacity = (i === 0) ? 1 : alphaSlider.value;
             img.style.zIndex = (i === 0) ? 1 : 2;
@@ -86,9 +86,9 @@
         updateTransform();
     }
 
-    // 以下の関数で元のスムーズな操作系を再現
     function updateTransform() { zoomCanvas.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`; }
     
+    // 操作ロジック（ズーム・移動）
     viewer.addEventListener('wheel', (e) => {
         e.preventDefault();
         scale *= (e.deltaY < 0) ? 1.1 : 1 / 1.1;
