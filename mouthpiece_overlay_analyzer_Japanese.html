@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>マウスピース形状解析ツール</title>
-    
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 10px; display: flex; flex-direction: column; height: 100vh; background: #f5f5f7; color: #333; box-sizing: border-box; }
         h3 { margin: 0 0 10px 0; font-size: 16px; font-weight: 600; color: #1d1d1f; border-bottom: 2px solid #e5e5ea; padding-bottom: 5px; }
         .container { display: flex; flex: 1; overflow: hidden; gap: 10px; }
         .panel { width: 300px; background: white; padding: 15px; border-radius: 12px; border: 1px solid #d2d2d7; display: flex; flex-direction: column; }
-        .viewer { flex: 1; background: white; border-radius: 12px; position: relative; overflow: hidden; border: 1px solid #d2d2d7; cursor: grab; }
+        .viewer { flex: 1; background: white; border-radius: 12px; position: relative; overflow: hidden; border: 1px solid #d2d2d7; cursor: grab; user-select: none; }
+        .viewer:active { cursor: grabbing; }
         .zoom-canvas { position: absolute; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; transform-origin: center center; }
         .file-list { flex: 1; overflow-y: auto; border: 1px solid #e5e5ea; margin: 5px 0; padding: 5px; border-radius: 6px; background: #fafafa; }
         .file-item { padding: 10px 8px; cursor: pointer; border-bottom: 1px solid #f2f2f7; font-size: 13px; }
@@ -36,57 +36,48 @@
 </div>
 
 <script>
-    // 【重要】ここにリポジトリ内の画像ファイル名を記載してください
+    // ここに全てのファイル名を記載してください
     const imageFiles = [
-        "01_BACH_3_S.png",
-        "02_BACH_4C_S.png",
-        "03_BACH_5GS_S.png",
-        "04_BACH_6_S.png"
-        // 必要に応じてリストを追加
+        "01_BACH_3_S.png", "02_BACH_4C_S.png", "03_BACH_5GS_S.png", "04_BACH_6_S.png",
+        "05_BACH_6-1p2AL_S_1.png", "06_BACH_6-1p2AL_S_2.png", "07_BACH_6-1p2AM_S_1.png",
+        "08_BACH_6-1p2AM_S_2.png", "09_BACH_6-3p4C_S.png", "10_BACH_9_S.png",
+        "11_BACH_11_S.png", "12_BACH_11C_S.png"
     ];
 
     const fileList = document.getElementById('fileList');
     const zoomCanvas = document.getElementById('zoomCanvas');
     const alphaSlider = document.getElementById('alphaSlider');
+    const viewer = document.getElementById('viewer');
     
-    let loadedImages = {};
     let selectedIndices = [];
     let scale = 1, translateX = 0, translateY = 0;
+    let isDragging = false, startX = 0, startY = 0;
 
-    // 初期化：ページ読み込み時に自動で画像をロード
     window.addEventListener('DOMContentLoaded', () => {
         fileList.innerHTML = '';
         imageFiles.forEach((name, index) => {
-            loadedImages[name] = name; // パスをそのまま使用
-            
             const item = document.createElement('div');
             item.className = 'file-item';
             item.textContent = name;
-            item.addEventListener('click', () => toggleSelect(index));
+            item.addEventListener('click', () => {
+                if (selectedIndices.includes(index)) {
+                    selectedIndices = selectedIndices.filter(i => i !== index);
+                    item.classList.remove('selected');
+                } else {
+                    selectedIndices.push(index);
+                    item.classList.add('selected');
+                }
+                renderOverlay();
+            });
             fileList.appendChild(item);
         });
     });
 
-    function toggleSelect(index) {
-        const items = fileList.getElementsByClassName('file-item');
-        const name = imageFiles[index];
-
-        if (selectedIndices.includes(index)) {
-            selectedIndices = selectedIndices.filter(i => i !== index);
-            items[index].classList.remove('selected');
-        } else {
-            selectedIndices.push(index);
-            items[index].classList.add('selected');
-        }
-        renderOverlay();
-    }
-
     function renderOverlay() {
         zoomCanvas.innerHTML = '';
-        selectedIndices.forEach((imgIndex, i) => {
-            const name = imageFiles[imgIndex];
+        selectedIndices.forEach((idx, i) => {
             const img = document.createElement('img');
-            img.src = name; // リポジトリ内の相対パスを参照
+            img.src = imageFiles[idx];
             img.className = 'overlay-img';
             img.style.opacity = (i === 0) ? 1 : alphaSlider.value;
             img.style.zIndex = (i === 0) ? 1 : 2;
@@ -95,13 +86,24 @@
         updateTransform();
     }
 
-    // 以下の機能（ズーム・ドラッグ等）は元のコードを維持
-    function updateTransform() {
-        zoomCanvas.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`;
-    }
+    // 以下の関数で元のスムーズな操作系を再現
+    function updateTransform() { zoomCanvas.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`; }
     
+    viewer.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        scale *= (e.deltaY < 0) ? 1.1 : 1 / 1.1;
+        scale = Math.min(Math.max(0.5, scale), 15);
+        updateTransform();
+    }, { passive: false });
+
+    viewer.addEventListener('mousedown', (e) => { isDragging = true; startX = e.clientX - translateX; startY = e.clientY - translateY; });
+    window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        translateX = e.clientX - startX; translateY = e.clientY - startY; updateTransform();
+    });
+    window.addEventListener('mouseup', () => isDragging = false);
+
     alphaSlider.addEventListener('input', renderOverlay);
-    // ... (以降のイベントリスナー等は元のコードから流用してください)
 </script>
 </body>
 </html>
