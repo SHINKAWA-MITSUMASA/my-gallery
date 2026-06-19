@@ -17,7 +17,6 @@
         .file-item.selected { background: #0071e3; color: white; font-weight: 500; }
         .overlay-img { position: absolute; max-width: 90%; max-height: 90%; mix-blend-mode: multiply; pointer-events: none; object-fit: contain; }
         .controls { margin-top: 10px; padding-top: 10px; border-top: 1px solid #e5e5ea; flex-shrink: 0; }
-        
         @media (max-width: 768px) {
             .container { flex-direction: column; }
             .panel { width: 100%; height: 40%; }
@@ -42,20 +41,27 @@
 </div>
 
 <script>
-    // 【ここに82個分のファイル名をすべて記述してください】
     const imageFiles = [
-        "01_BACH_3_S.png", "02_BACH_4C_S.png", "03_BACH_5GS_S.png", "04_BACH_6_S.png",
-        // ... 残りのファイル名もここにすべて追記してください
+        "01_BACH_3_S.png", "02_BACH_4C_S.png", "03_BACH_5GS_S.png", "04_BACH_6_S.png", "05_BACH_6-1p2AL_S_1.png", 
+        "06_BACH_6-1p2AL_S_2.png", "07_BACH_6-1p2AM_S_1.png", "08_BACH_6-1p2AM_S_2.png", "09_BACH_6-3p4C_S.png", "10_BACH_9_S.png", 
+        "11_BACH_11_S.png", "12_BACH_11C_S.png", "13_BACH_NY11C_S.png", "14_BACH_NY12C_S_1.png", "15_BACH_NY12C_S_2.png", 
+        "16_BACH_15C_S.png", "17_BACH_15EW_S.png", "18_BACH_1G_L.png", "19_BACH_1-1p4G_L.png", "20_BACH_1-1p2G_L_1.png", 
+        "21_BACH_1-1p2G_L_2.png", "22_BACH_2G_L_1.png", "23_BACH_2G_L_2.png", "24_BACH_3G_L.png", "25_BACH_4G_L.png", 
+        "26_BACH_5G_L.png", "28_BACH_5GO_L_1.png", "29_BACH_5GO_L_2.png", "30_BACH_6-1p2A_L.png", "31_BACH_6-1p2AL_L.png", 
+        "32_BACH_6-1p2AM_L.png", "33_Alliance_E3A_L.png", "34_arnolds&sons_1-1p2G_L.png", "35_BENGE_12C_S.png", "36_BUZZ_NY3G_L.png", 
+        "37_BUZZ_11C_S.png", "38_BandS_6p2_S.png", "39_CONN_5G_L.png", "40_DENISWICK_0AL_L.png", "41_DENISWICK_5AL_L.png", 
+        "42_Giardinelli_SYM-AL_L.png", "43_GRIEGO_ALESSI_3A_L.png", "44_GRIEGO_ALESSI_4A_L.png", "45_GRIEGO_ALESSI_5A_L.png", "46_JET-TONE_URBIE-GREEN_S.png", 
+        "47_JK_Cieslik_L.png", "48_JK_S1-1p2G_L.png", "49_JK_C.G._S.png", "50_K&G_3.5D_L.png", "51_KING_MARCELLUS_L.png", 
+        "52_LASKEY_46C_S.png", "53_MOMO_AYA-SP_L.png", "54_NIKKAN_NO.2_S.png", "55_REMINGTON_L.png", "56_SCHILKE_60CV_L.png", 
+        "57_SCHILKE_53_L.png", "58_SCHILKE_51D_S.png", "59_SCHILKE_51D_L.png", "60_SCHILKE_51B_L.png", "61_SCHILKE_51B_S.png", 
+        "62_SCHILKE_47_S.png", "63_SCHILKE_45B_S.png", "64_SCHILKE_42B_S.png", "65_Schmidt Bambula_TP3_S.png", "66_Schmidt Bambula_TP3-1p2A_S.png", 
+        "67_Schmidt Bambula_TP4-1p4_S.png", "68_SLOKAR_TENOR-SOLO-A_S.png", "69_SLOKAR_ALTO_S.png", "70_STORK_T1_L.png", "71_Tilz_4C_S.png", 
+        "72_Tilz_6-1p2AS TB1_S.png", "73_Tilz_6-1p2AM_S.png", "74_Tilz_6-1p2A_S.png", "75_Tilz_Doms 2_S.png", "76_WARBURTON_5G_L.png", 
+        "77_WARBURTON_11_S.png", "78_willies_RB_S.png", "79_willies_RB_L.png", "80_willies_SK5S_L.png", "81_YAMAHA_D.Yeo_L.png", "82_YAMAHA_SL-48S_S.png"
     ];
 
-    const fileList = document.getElementById('fileList');
-    const zoomCanvas = document.getElementById('zoomCanvas');
-    const alphaSlider = document.getElementById('alphaSlider');
-    const viewer = document.getElementById('viewer');
-    
-    let selectedIndices = [];
-    let scale = 1, translateX = 0, translateY = 0;
-    let isDragging = false, startX = 0, startY = 0;
+    const fileList = document.getElementById('fileList'), zoomCanvas = document.getElementById('zoomCanvas'), alphaSlider = document.getElementById('alphaSlider'), viewer = document.getElementById('viewer');
+    let selectedIndices = [], scale = 1, translateX = 0, translateY = 0, isDragging = false, startX = 0, startY = 0;
 
     window.addEventListener('DOMContentLoaded', () => {
         fileList.innerHTML = '';
@@ -64,13 +70,8 @@
             item.className = 'file-item';
             item.textContent = name;
             item.addEventListener('click', () => {
-                if (selectedIndices.includes(index)) {
-                    selectedIndices = selectedIndices.filter(i => i !== index);
-                    item.classList.remove('selected');
-                } else {
-                    selectedIndices.push(index);
-                    item.classList.add('selected');
-                }
+                if (selectedIndices.includes(index)) { selectedIndices = selectedIndices.filter(i => i !== index); item.classList.remove('selected'); }
+                else { selectedIndices.push(index); item.classList.add('selected'); }
                 renderOverlay();
             });
             fileList.appendChild(item);
@@ -81,7 +82,7 @@
         zoomCanvas.innerHTML = '';
         selectedIndices.forEach((idx, i) => {
             const img = document.createElement('img');
-            img.src = imageFiles[idx]; 
+            img.src = imageFiles[idx];
             img.className = 'overlay-img';
             img.style.opacity = (i === 0) ? 1 : alphaSlider.value;
             img.style.zIndex = (i === 0) ? 1 : 2;
@@ -92,38 +93,14 @@
 
     function updateTransform() { zoomCanvas.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`; }
 
-    // 操作ロジック：マウス ＆ タッチ統合版
-    const startDrag = (x, y) => {
-        if (selectedIndices.length === 0) return;
-        isDragging = true; startX = x - translateX; startY = y - translateY;
-    };
-    
-    // マウス操作
+    const startDrag = (x, y) => { isDragging = true; startX = x - translateX; startY = y - translateY; };
     viewer.addEventListener('mousedown', (e) => startDrag(e.clientX, e.clientY));
-    window.addEventListener('mousemove', (e) => {
-        if (!isDragging) return;
-        translateX = e.clientX - startX; translateY = e.clientY - startY; updateTransform();
-    });
+    window.addEventListener('mousemove', (e) => { if (isDragging) { translateX = e.clientX - startX; translateY = e.clientY - startY; updateTransform(); }});
     window.addEventListener('mouseup', () => isDragging = false);
-
-    // タッチ操作
-    viewer.addEventListener('touchstart', (e) => {
-        if(e.touches.length === 1) startDrag(e.touches[0].clientX, e.touches[0].clientY);
-    }, { passive: true });
-    window.addEventListener('touchmove', (e) => {
-        if (!isDragging) return;
-        translateX = e.touches[0].clientX - startX; translateY = e.touches[0].clientY - startY; updateTransform();
-    }, { passive: true });
+    viewer.addEventListener('touchstart', (e) => { if(e.touches.length === 1) startDrag(e.touches[0].clientX, e.touches[0].clientY); }, { passive: true });
+    window.addEventListener('touchmove', (e) => { if (isDragging) { translateX = e.touches[0].clientX - startX; translateY = e.touches[0].clientY - startY; updateTransform(); }});
     window.addEventListener('touchend', () => isDragging = false);
-
-    // ホイールズーム
-    viewer.addEventListener('wheel', (e) => {
-        e.preventDefault();
-        scale *= (e.deltaY < 0) ? 1.1 : 1 / 1.1;
-        scale = Math.min(Math.max(0.5, scale), 15);
-        updateTransform();
-    }, { passive: false });
-
+    viewer.addEventListener('wheel', (e) => { e.preventDefault(); scale = Math.min(Math.max(0.5, scale * (e.deltaY < 0 ? 1.1 : 0.909)), 15); updateTransform(); }, { passive: false });
     alphaSlider.addEventListener('input', renderOverlay);
 </script>
 </body>
