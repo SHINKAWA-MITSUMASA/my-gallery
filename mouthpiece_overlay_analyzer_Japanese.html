@@ -14,8 +14,9 @@
         .zoom-canvas { position: absolute; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; transform-origin: center center; }
         .file-list { flex: 1; overflow-y: auto; border: 1px solid #e5e5ea; margin: 5px 0; padding: 5px; border-radius: 6px; background: #fafafa; -webkit-overflow-scrolling: touch; }
         .file-item { padding: 10px 8px; cursor: pointer; border-bottom: 1px solid #f2f2f7; font-size: 13px; }
-        .file-item.selected { background: #0071e3; color: white; }
+        .file-item.selected { background: #0071e3; color: white; font-weight: 500; }
         .overlay-img { position: absolute; max-width: 90%; max-height: 90%; mix-blend-mode: multiply; pointer-events: none; object-fit: contain; }
+        .controls { margin-top: 10px; padding-top: 10px; border-top: 1px solid #e5e5ea; flex-shrink: 0; }
         
         @media (max-width: 768px) {
             .container { flex-direction: column; }
@@ -41,12 +42,10 @@
 </div>
 
 <script>
-    // 【ここにリポジトリ内の画像ファイル名を全て記述してください】
+    // 【ここに82個分のファイル名をすべて記述してください】
     const imageFiles = [
         "01_BACH_3_S.png", "02_BACH_4C_S.png", "03_BACH_5GS_S.png", "04_BACH_6_S.png",
-        "05_BACH_6-1p2AL_S_1.png", "06_BACH_6-1p2AL_S_2.png", "07_BACH_6-1p2AM_S_1.png",
-        "08_BACH_6-1p2AM_S_2.png", "09_BACH_6-3p4C_S.png", "10_BACH_9_S.png",
-        "11_BACH_11_S.png", "12_BACH_11C_S.png"
+        // ... 残りのファイル名もここにすべて追記してください
     ];
 
     const fileList = document.getElementById('fileList');
@@ -82,7 +81,7 @@
         zoomCanvas.innerHTML = '';
         selectedIndices.forEach((idx, i) => {
             const img = document.createElement('img');
-            img.src = imageFiles[idx];
+            img.src = imageFiles[idx]; 
             img.className = 'overlay-img';
             img.style.opacity = (i === 0) ? 1 : alphaSlider.value;
             img.style.zIndex = (i === 0) ? 1 : 2;
@@ -93,8 +92,9 @@
 
     function updateTransform() { zoomCanvas.style.transform = `translate(${translateX}px, ${translateY}px) scale(${scale})`; }
 
-    // 操作ロジック：マウス ＆ タッチ対応
+    // 操作ロジック：マウス ＆ タッチ統合版
     const startDrag = (x, y) => {
+        if (selectedIndices.length === 0) return;
         isDragging = true; startX = x - translateX; startY = y - translateY;
     };
     
@@ -106,7 +106,7 @@
     });
     window.addEventListener('mouseup', () => isDragging = false);
 
-    // タッチ操作（スマホ・タブレット用）
+    // タッチ操作
     viewer.addEventListener('touchstart', (e) => {
         if(e.touches.length === 1) startDrag(e.touches[0].clientX, e.touches[0].clientY);
     }, { passive: true });
